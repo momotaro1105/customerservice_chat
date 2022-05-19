@@ -1,0 +1,20 @@
+以下VSCODEより抜粋コメント
+
+ここまでの大まかな流れは以下の通り；
+1) firebase上で下準備
+    a. プロジェクトの作成
+    b. webアプリ申告
+    c. 個別アプリ登録
+2) VSCodeからfirebaseに接続するためにテンプレートコードを貼り付ける
+    a. 必要に応じてlibraryを追加
+    b. versionの確認必須
+3) Realtime Databaseを作成
+4) 3で作成したデータベースに接続
+5) データベース内のどのアプリに追加するか選択
+↑ここまでは基本設定（コピペ）
+6) send onclickでobject作成（作り方はlocalStorageに類似）
+7) 作成objectをpushして、DBに値をセット
+8) 新規でDBにセットした時に、受信データを加工してhtmlに載せる
+9) 各受信データにはunique keyがアサインされている、firebase database内で確認可能
+    database.length（ここのデータベースにあるユニークキーの数）
+

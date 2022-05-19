@@ -1,0 +1,127 @@
+*{
+    font-family: sans-serif;
+    margin:0;
+    padding: 0;
+    font-size: 20px;
+    color: white;
+    background-color: black;
+}
+body{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+body>div{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+#head{
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding-left: 7px;
+    background-color: #D3D3D3;
+    color: #696969;
+}
+#head>i{
+    background-color: #D3D3D3;
+    padding-right: 7px;
+    color: #696969;
+}
+#output{
+    padding: 10px 10px;
+    overflow: auto;
+    height: 85%;
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+#output>div{
+    overflow: auto;
+    height: 90px;
+    background-color: white;
+}
+#output p{
+    line-height: 35px;
+    margin-bottom: 10px;
+    border-radius: 25px;
+    padding: 3px 20px;
+    background-color: #589FFB;
+}
+#output .user{
+    width: 500px;
+    position: absolute;
+    right: 10px;
+}
+#input{
+    background-color: #D3D3D3;
+    display: flex;
+    flex-grow: 1;
+    padding: 10px 20px;
+    justify-content: space-between;
+}
+#text{
+    width: 75%;
+    border: none;
+    background-color: #505050;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    padding-top: 7px;
+}
+::placeholder{
+    color: white;
+}
+#upload{
+    width: 10%;
+    border: none;
+    border-radius: 25px;
+    background-color: #589FFB;
+}
+#finish{
+    width: 10%;
+    border: none;
+    border-radius: 25px;
+    background-color: #32CD32;
+}
+#typing{
+    margin: 32px;
+    background-color: white;
+    display: flex;
+    position: absolute;
+    right: 10px;
+}
+#typing>span{
+    width: 10px;
+    height: 10px;
+    background-color: #589FFB;
+    margin: 1px;
+    margin-right: 5px;
+    border-radius: 50%;
+    display: flex;
+}
+@keyframes bounce {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(8px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+}
+#child1{
+    animation: bounce 1s infinite;
+}
+#child2{
+    animation: bounce 1s infinite .2s;
+}
+#child3{
+    animation: bounce 1s infinite .4s;
+}

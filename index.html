@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/style.css">
+        <title>Customer Service</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    </head>
+    <body>
+        <!-- コンテンツ表示画面 -->
+        <div>
+            <div id="head">
+                <i class="material-icons">chat</i>
+                Welcome to customer service
+            </div>
+            <div id="output"></div>
+            <div id="input">
+                <textarea id="text" cols="100" rows="1" placeholder="Enter your message..."></textarea>
+                <button id="upload">UPLOAD</button>
+                <button id="finish">FINISH</button>
+            </div>
+        </div>
+        <!--/ コンテンツ表示画面 -->
+
+        <!-- JQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <!-- JQuery -->
+
+        <!--** 以下Firebase **-->
+        <script type="module">
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js"; //右のURLに入っている左のcommandを使用
+            import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved } 
+            from "https://www.gstatic.com/firebasejs/9.8.1/firebase-database.js"; // version check必須
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+            // Your web app's Firebase configuration
+            const firebaseConfig = { // htmlからfirebaseにアクセスする時に使う情報
+            apiKey: "____________________________________",
+            authDomain: "____________________________________",
+            projectId: "____________________________________",
+            storageBucket: "____________________________________",
+            messagingSenderId: "____________________________________",
+            appId: "____________________________________"
+            };
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const dbRef = ref(db, "chat");
+
+            // prompt global variables for ID
+            let uname = prompt("What should we call you?");
+            // check name
+            if (uname == "") {
+                alert("We will refer to you as anonymous");
+                uname = "Customer";
+            };
+
+            let email = prompt("Please enter your email address. We use this to send you a log of our discussion.");
+            // validate email address
+            function validEmail() {
+                // check syntax of input
+                let result = /\S+@\S+\.\S+/.test(email);
+                while (!result) {
+                    email = prompt("Please enter a valid email address");
+                    result = /\S+@\S+\.\S+/.test(email);
+                };
+            };
+            validEmail();
+
+            // store to session storage
+            sessionStorage.setItem(uname, email);
+
+            const timestamp = new Date();
+            const year = timestamp.getFullYear();
+            const month = timestamp.getMonth();
+            const day = timestamp.getDate();
+
+            const typing = '<div id="parent"><div id="typing"><span id="child1"></span><span id="child2"></span><span id="child3"></span></div></div>';
+
+            let indicator = false;
+            // show typing balls while typing in textarea
+            function typingball(){
+                $("#text").on("keyup", function(e){
+                    if (indicator == false && e.keyCode != 13){
+                        $("#output").append(typing);
+                        indicator = true;
+                        console.log("appended", indicator);
+                    }
+                });
+            };
+            typingball();
+
+            // check if input only contains spaces
+            function onlySpaces(i) {
+                return i.trim().length != 0;
+            };
+
+            // send data using enter key
+            $("#text").on("keydown", function(e){
+                // textarea cannot be blank
+                if (onlySpaces($("#text").val())) {
+                    // if "enter" key pressed
+                    if (e.keyCode == 13) {
+                        console.log("enter clicked"); // works
+                        var fordelete = document.getElementById("parent");
+                        if (fordelete != null){
+                            fordelete.parentNode.removeChild(fordelete); // go to parent first, then delete child
+                            indicator = false;
+                            console.log("typing balls deleted");
+                        };
+                        const msg = {
+                            name: uname,
+                            text: $(this).val()
+                        };
+                        const newPostRef = push(dbRef);
+                        set(newPostRef, msg);
+                    };
+                };
+                // prevent "enter" key from new line
+                if (e.keyCode == 13 && !e.shiftKey) {
+                    e.preventDefault;
+                    return false;
+                };
+            });
+
+            // when data received
+            onChildAdded(dbRef, function(data){
+                // clear input fields on "enter"
+                $("#text").val("");
+                // create object and append to chat div
+                const msg = data.val();
+                const key = data.key;
+                let h = '<div><p class="user">';
+                    h += msg.name;
+                    h += '<br>';
+                    h += msg.text;
+                    h += '</p></div>';
+                $("#output").append(h);
+                document.querySelector("#output").scrollTop = document.querySelector("#output").scrollHeight;
+            });
+
+            // when chat finished
+            $("#finish").on("click", function(){
+                const today = year+"_"+(month+1)+"_"+day;
+                const cc = "customerservice@gmail.com";
+                const subject = "Customer Service Report for "+uname+" on "+today;
+                const bodymessage = "Dear "+uname+", please save this email and/or JSON log below for future queries."
+                const restapi = "https://gsdemo-9abe7-default-rtdb.firebaseio.com/chat.json";
+
+                // fetch data from API
+                async function fetchData(callback) {
+                    let response = await fetch(restapi);
+                    let data = await response.json();
+                    // convert data to type string
+                    data = JSON.stringify(data);
+                    function download(content, fileName, contentType) {
+                        var a = document.createElement("a");
+                        var file = new Blob([content], {type: contentType});
+                        a.href = URL.createObjectURL(file);
+                        a.download = fileName;
+                        a.click();
+                    };
+                    download(data, 'log.json', 'text/plain');
+                    console.log(data, typeof(data)); // works
+                    // creating an email attachment to below requires server-side language
+                    window.open("mailto:"+email+'?cc='+cc+'&subject='+subject+'&body='+bodymessage+'%0D%0A'+'%0D%0A'+data);
+                    callback();
+                };
+                // https://stackoverflow.com/questions/68569153/saving-data-from-promise-in-a-variable
+
+                // clear chat database
+                function cleardb() {
+                    remove(dbRef);
+                };
+                
+                // calling with callback function
+                fetchData(cleardb); 
+            });
+
+        </script>
+    </body>
+</html>
